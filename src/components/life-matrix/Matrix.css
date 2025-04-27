@@ -1,0 +1,19 @@
+body {
+  align-items: center;
+  background-color: aliceblue;
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+}
+
+.cell {
+  border: 1px solid gray;
+}
+
+.cell-alive {
+  background-color: black;
+}
+
+.cell-dead {
+  background-color: white;
+}

@@ -1,11 +1,12 @@
-import { randomNumber } from "./utils/random"
+import Matrix from "./components/life-matrix/Matrix"
+import lifeMatrixConfig from "./config/life-matrix.config";
 
 
 
+const { rows, columns } = lifeMatrixConfig;
 function App() {
-
   return <div>
-    {Array.from({length: 20},() =>randomNumber(0, 1)).map(n => <div>{n}</div>)}
+    <Matrix rows={rows} columns={columns} interval={2000}></Matrix>
   </div>
 }
 
