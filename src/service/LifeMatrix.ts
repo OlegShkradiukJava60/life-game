@@ -1,55 +1,53 @@
+class LifeMatrix {
+    rows: number;
+    columns: number;
+    matrix: number[][];
 
-import { getRandomMatrix } from "../utils/matrix";
-
-export default class LifeMatrix {
-    private _matrix: number[][];
-
-    constructor(rows: number, columns: number) {
-        this._matrix = getRandomMatrix(rows, columns, 0, 1); // Initialize matrix with random 0s and 1s
+    constructor(rows: number, columns: number, initialMatrix?: number[][]) {
+        this.rows = rows;
+        this.columns = columns;
+        this.matrix = initialMatrix ?? this.createRandomMatrix();
     }
 
-    get matrix() {
-        return this._matrix;
-    }
-
-    next(): number[][] {
-        const rows = this._matrix.length;
-        const columns = this._matrix[0].length;
-        const nextGeneration = new Array(rows);
-
-        for (let i = 0; i < rows; i++) {
-            nextGeneration[i] = new Array(columns);
-            for (let j = 0; j < columns; j++) {
-                const liveNeighbors = this.countLiveNeighbors(i, j, rows, columns);
-
-                if (this._matrix[i][j] === 1) {
-                    nextGeneration[i][j] = liveNeighbors < 2 || liveNeighbors > 3 ? 0 : 1;
-                } else {
-                    nextGeneration[i][j] = liveNeighbors === 3 ? 1 : 0;
-                }
+    createRandomMatrix(): number[][] {
+        const matrix: number[][] = [];
+        for (let i = 0; i < this.rows; i++) {
+            const row: number[] = [];
+            for (let j = 0; j < this.columns; j++) {
+                row.push(Math.random() > 0.5 ? 1 : 0);
             }
+            matrix.push(row);
         }
-
-        this._matrix = nextGeneration;
-        return this._matrix;
+        return matrix;
     }
 
-    private countLiveNeighbors(row: number, col: number, rows: number, columns: number): number {
-        let liveNeighbors = 0;
+    countLiveNeighbors(row: number, col: number): number {
+        return [-1, 0, 1].flatMap(i =>
+            [-1, 0, 1].map(j => [i, j])
+        )
+            .filter(([i, j]) => !(i === 0 && j === 0)) // exclude the cell itself
+            .map(([i, j]) => [row + i, col + j])
+            .filter(([r, c]) =>
+                r >= 0 && r < this.rows && c >= 0 && c < this.columns
+            )
+            .reduce((sum, [r, c]) => sum + this.matrix[r][c], 0);
+    }
 
-        for (let i = -1; i <= 1; i++) {
-            for (let j = -1; j <= 1; j++) {
-                if (i === 0 && j === 0) continue;
+    evolve(): number[][] {
+        const newMatrix = this.matrix.map((row, rowIndex) =>
+            row.map((cell, colIndex) => {
+                const neighbors = this.countLiveNeighbors(rowIndex, colIndex);
+                const isAlive = cell === 1;
+                return isAlive
+                    ? (neighbors === 2 || neighbors === 3 ? 1 : 0)
+                    : (neighbors === 3 ? 1 : 0);
+            })
+        );
 
-                const neighborRow = row + i;
-                const neighborCol = col + j;
-
-                if (neighborRow >= 0 && neighborRow < rows && neighborCol >= 0 && neighborCol < columns) {
-                    liveNeighbors += this._matrix[neighborRow][neighborCol];
-                }
-            }
-        }
-
-        return liveNeighbors;
+        this.matrix = newMatrix;
+        return newMatrix;
     }
 }
+
+
+export default LifeMatrix;
